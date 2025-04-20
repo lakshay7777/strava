@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strava Clone - Enhanced Training Load Analysis</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
+    <style>
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5fa;
+            color: #242428;
+            line-height: 1.5;
+        }
+        
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+        
+        /* Header Styles */
+        header {
+            background-color: white;
+            height: 60px;
+            border-bottom: 1px solid #dfdfe8;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo {
+            height: 30px;
+            margin-right: 15px;
+        }
+        
+        .nav-links {
+            display: flex;
+            height: 100%;
+        }
+        
+        .nav-links a {
+            color: #6d6d78;
+            padding: 0 15px;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            height: 60px;
+            border-bottom: 2px solid transparent;
+        }
+        
+        .nav-links a:hover, .nav-links a.active {
+            color: #fc5200;
+            border-bottom: 2px solid #fc5200;
+        }
+        
+        .header-right {
+            display: flex;
+            align-items: center;
+        }
+        
+        .header-icons {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-right: 20px;
+        }
+        
+        .header-icons i {
+            color: #6d6d78;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        
+        .header-icons i:hover {
+            color: #fc5200;
+        }
+        
+        .profile-img {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: #dfdfe8;
+            cursor: pointer;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .profile-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .btn-upload {
+            background-color: #fc5200;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 15px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            margin-right: 20px;
+        }
+        
+        .btn-upload:hover {
+            background-color: #e34c00;
+        }
+        
+        /* Main Content Styles */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            gap: 20px;
+        }
+        
+        /* Sidebar Styles */
+        .sidebar {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            padding: 20px;
+        }
+        
+        .user-profile {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #dfdfe8;
+        }
+        
+        .user-profile-img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: #dfdfe8;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+        
+        .user-profile-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .user-name {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .user-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            width: 100%;
+        }
+        
+        .stat {
+            text-align: center;
+            flex: 1;
+        }
+        
+        .stat-value {
+            font-size: 18px;
+            font-weight: 600;
+            color: #242428;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #6d6d78;
+        }
+        
+        .sidebar-section {
+            margin-bottom: 20px;
+        }
+        
+        .sidebar-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        
+        .club-item, .challenge-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .club-logo, .challenge-logo {
+            width: 40px;
+            height: 40px;
+            border-radius: 4px;
+            background-color: #dfdfe8;
+            overflow: hidden;
+        }
+        
+        .club-logo img, .challenge-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .club-info h4, .challenge-info h4 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+        
+        .club-info p, .challenge-info p {
+            font-size: 12px;
+            color: #6d6d78;
+        }
+        
+        /* Feed Styles */
+        .feed {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .post {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+        
+        .post-header {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #f5f5fa;
+        }
+        
+        .post-user-img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #dfdfe8;
+            margin-right: 10px;
+            overflow: hidden;
+        }
+        
+        .post-user-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .post-user-info {
+            flex: 1;
+        }
+        
+        .post-user-name {
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .post-time {
+            font-size: 12px;
+            color: #6d6d78;
+        }
+        
+        .post-content {
+            padding: 15px;
+        }
+        
+        .post-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .post-text {
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+        
+        .post-stats {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .post-stat {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .post-stat i {
+            color: #fc5200;
+            font-size: 16px;
+        }
+        
+        .post-stat span {
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .post-map {
+            height: 200px;
+            background-color: #dfdfe8;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .post-map img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .post-actions {
+            display: flex;
+            border-top: 1px solid #f5f5fa;
+            padding: 10px 15px;
+        }
+        
+        .post-action {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 4px;
+            margin-right: 15px;
+        }
+        
+        .post-action:hover {
+            background-color: #f5f5fa;
+        }
+        
+        .post-action i {
+            color: #6d6d78;
+            font-size: 16px;
+        }
+        
+        .post-action span {
+            font-size: 14px;
+            color: #6d6d78;
+        }
+        
+        /* Right Sidebar - Training Load Analysis (New Feature) */
+        .right-sidebar {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            padding: 20px;
+        }
+        
+        .feature-title {
+            color: #fc5200;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .feature-badge {
+            display: inline-block;
+            background-color: #e34c00;
+            color: white;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-left: 5px;
+            vertical-align: middle;
+        }
+        
+        .training-stats {
+            margin-bottom: 20px;
+        }
+        
+        .training-stat {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #f5f5fa;
+        }
+        
+        .training-stat-label {
+            font-size: 14px;
+            color: #6d6d78;
+        }
+        
+        .training-stat-value {
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .chart-container {
+            height: 200px;
+            margin-bottom: 20px;
+        }
+        
+        .load-status {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .load-status-optimal {
+            background-color: #e8f5e9;
+            border-left: 4px solid #4caf50;
+        }
+        
+        .load-status-warning {
+            background-color: #fff8e1;
+            border-left: 4px solid #ffc107;
+        }
+        
+        .load-status-danger {
+            background-color: #ffebee;
+            border-left: 4px solid #f44336;
+        }
+        
+        .load-status h4 {
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+        
+        .load-status p {
+            font-size: 14px;
+            color: #6d6d78;
+        }
+        
+        .recommendations {
+            margin-top: 20px;
+        }
+        
+        .recommendation {
+            padding: 10px 0;
+            border-bottom: 1px solid #f5f5fa;
+        }
+        
+        .recommendation:last-child {
+            border-bottom: none;
+        }
+        
+        .recommendation h4 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .recommendation p {
+            font-size: 13px;
+            color: #6d6d78;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            width: 90%;
+            max-width: 800px;
+            border-radius: 8px;
+            padding: 20px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #fc5200;
+        }
+        
+        .modal-close {
+            cursor: pointer;
+            font-size: 24px;
+            color: #6d6d78;
+        }
+        
+        .modal-close:hover {
+            color: #fc5200;
+        }
+        
+        .detailed-charts {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .detailed-chart {
+            height: 250px;
+        }
+        
+        .detailed-insights {
+            margin-top: 20px;
+        }
+        
+        .insight-card {
+            padding: 15px;
+            background-color: #f9f9fb;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .insight-card h4 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #fc5200;
+        }
+        
+        .insight-card p {
+            font-size: 14px;
+            color: #242428;
+        }
+
+        /* Responsive styles */
+        @media (max-width: 1024px) {
+            .content {
+                grid-template-columns: 1fr 2fr;
+            }
+            
+            .right-sidebar {
+                grid-column: 1 / 3;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar, .right-sidebar {
+                grid-column: 1;
+            }
+            
+            .detailed-charts {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-left">
+            <img src="/api/placeholder/100/30" alt="Strava Logo" class="logo">
+            <nav class="nav-links">
+                <a href="#" class="active">Home</a>
+                <a href="#">My Activities</a>
+                <a href="#">Explore</a>
+                <a href="#">Challenges</a>
+                <a href="#">Training</a>
+            </nav>
+        </div>
+        <div class="header-right">
+            <button class="btn-upload">Upload Activity</button>
+            <div class="header-icons">
+                <i class="fas fa-bell"></i>
+                <i class="fas fa-comment"></i>
+            </div>
+            <div class="profile-img">
+                <img src="/api/placeholder/36/36" alt="Profile">
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="content">
+            <!-- Left Sidebar -->
+            <div class="sidebar">
+                <div class="user-profile">
+                    <div class="user-profile-img">
+                        <img src="/api/placeholder/80/80" alt="User Profile">
+                    </div>
+                    <h3 class="user-name">Alex Runner</h3>
+                    <div class="user-stats">
+                        <div class="stat">
+                            <div class="stat-value">142</div>
+                            <div class="stat-label">Following</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">98</div>
+                            <div class="stat-label">Followers</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">215</div>
+                            <div class="stat-label">Activities</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="sidebar-section">
+                    <h3 class="sidebar-title">Your Clubs</h3>
+                    <div class="club-item">
+                        <div class="club-logo">
+                            <img src="/api/placeholder/40/40" alt="Club Logo">
+                        </div>
+                        <div class="club-info">
+                            <h4>Morning Runners</h4>
+                            <p>1,245 members</p>
+                        </div>
+                    </div>
+                    <div class="club-item">
+                        <div class="club-logo">
+                            <img src="/api/placeholder/40/40" alt="Club Logo">
+                        </div>
+                        <div class="club-info">
+                            <h4>Marathon Training</h4>
+                            <p>842 members</p>
+                        </div>
+                    </div>
+                    <div class="club-item">
+                        <div class="club-logo">
+                            <img src="/api/placeholder/40/40" alt="Club Logo">
+                        </div>
+                        <div class="club-info">
+                            <h4>Local Trail Runners</h4>
+                            <p>521 members</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="sidebar-section">
+                    <h3 class="sidebar-title">Active Challenges</h3>
+                    <div class="challenge-item">
+                        <div class="challenge-logo">
+                            <img src="/api/placeholder/40/40" alt="Challenge Logo">
+                        </div>
+                        <div class="challenge-info">
+                            <h4>April 5K Challenge</h4>
+                            <p>18 days remaining</p>
+                        </div>
+                    </div>
+                    <div class="challenge-item">
+                        <div class="challenge-logo">
+                            <img src="/api/placeholder/40/40" alt="Challenge Logo">
+                        </div>
+                        <div class="challenge-info">
+                            <h4>Spring Distance Challenge</h4>
+                            <p>25 days remaining</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feed -->
+            <div class="feed">
+                <div class="post">
+                    <div class="post-header">
+                        <div class="post-user-img">
+                            <img src="/api/placeholder/40/40" alt="User">
+                        </div>
+                        <div class="post-user-info">
+                            <div class="post-user-name">Sarah Johnson</div>
+                            <div class="post-time">Today at 8:45 AM</div>
+                        </div>
+                    </div>
+                    <div class="post-content">
+                        <h3 class="post-title">Morning Run</h3>
+                        <p class="post-text">Perfect weather for a morning run today! Felt strong throughout.</p>
+                        <div class="post-stats">
+                            <div class="post-stat">
+                                <i class="fas fa-route"></i>
+                                <span>8.2 km</span>
+                            </div>
+                            <div class="post-stat">
+                                <i class="fas fa-stopwatch"></i>
+                                <span>45:22</span>
+                            </div>
+                            <div class="post-stat">
+                                <i class="fas fa-arrow-up"></i>
+                                <span>124m</span>
+                            </div>
+                        </div>
+                        <div class="post-map">
+                            <img src="/api/placeholder/600/200" alt="Activity Map">
+                        </div>
+                    </div>
+                    <div class="post-actions">
+                        <div class="post-action">
+                            <i class="fas fa-thumbs-up"></i>
+                            <span>Like</span>
+                        </div>
+                        <div class="post-action">
+                            <i class="fas fa-comment"></i>
+                            <span>Comment</span>
+                        </div>
+                        <div class="post-action">
+                            <i class="fas fa-share"></i>
+                            <span>Share</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="post">
+                    <div class="post-header">
+                        <div class="post-user-img">
+                            <img src="/api/placeholder/40/40" alt="User">
+                        </div>
+                        <div class="post-user-info">
+                            <div class="post-user-name">Mike Turner</div>
+                            <div class="post-time">Yesterday at 6:30 PM</div>
+                        </div>
+                    </div>
+                    <div class="post-content">
+                        <h3 class="post-title">Evening Trail Run</h3>
+                        <p class="post-text">Hit the trails after work. Some muddy sections but overall great conditions. New personal best on the Hill Climb segment!</p>
+                        <div class="post-stats">
+                            <div class="post-stat">
+                                <i class="fas fa-route"></i>
+                                <span>12.4 km</span>
+                            </div>
+                            <div class="post-stat">
+                                <i class="fas fa-stopwatch"></i>
+                                <span>1:12:05</span>
+                            </div>
+                            <div class="post-stat">
+                                <i class="fas fa-arrow-up"></i>
+                                <span>345m</span>
+                            </div>
+                        </div>
+                        <div class="post-map">
+                            <img src="/api/placeholder/600/200" alt="Activity Map">
+                        </div>
+                    </div>
+                    <div class="post-actions">
+                        <div class="post-action">
+                            <i class="fas fa-thumbs-up"></i>
+                            <span>Like</span>
+                        </div>
+                        <div class="post-action">
+                            <i class="fas fa-comment"></i>
+                            <span>Comment</span>
+                        </div>
+                        <div class="post-action">
+                            <i class="fas fa-share"></i>
+                            <span>Share</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="post">
+                    <div class="post-header">
+                        <div class="post-user-img">
+                            <img src="/api/placeholder/40/40" alt="User">
+                        </div>
+                        <div class="post-user-info">
+                            <div class="post-user-name">Lisa Chen</div>
+                            <div class="post-time">2 days ago</div>
+                        </div>
+                    </div>
+                    <div class="post-content">
+                        <h3 class="post-title">Marathon Training Long Run</h3>
+                        <p class="post-text">Week 8 of marathon training. Long run day! Feeling good about my progress so far. Only 8 weeks to go until race day!</p>
+                        <div class="post-stats">
+                            <div class="post-stat">
+                                <i class="fas fa-route"></i>
+                                <span>25.8 km</span>
+                            </div>
+                            <div class="post-stat">
+                                <i class="fas fa-stopwatch"></i>
+                                <span>2:28:47</span>
+                            </div>
+                            <div class="post-stat">
+                                <i class="fas fa-arrow-up"></i>
+                                <span>212m</span>
+                            </div>
+                        </div>
+                        <div class="post-map">
+                            <img src="/api/placeholder/600/200" alt="Activity Map">
+                        </div>
+                    </div>
+                    <div class="post-actions">
+                        <div class="post-action">
+                            <i class="fas fa-thumbs-up"></i>
+                            <span>Like</span>
+                        </div>
+                        <div class="post-action">
+                            <i class="fas fa-comment"></i>
+                            <span>Comment</span>
+                        </div>
+                        <div class="post-action">
+                            <i class="fas fa-share"></i>
+                            <span>Share</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Sidebar - Training Load Analysis (New Feature) -->
+            <div class="right-sidebar">
+                <h3 class="feature-title">Training Load Analysis <span class="feature-badge">NEW</span></h3>
+                
+                <div class="training-stats">
+                    <div class="training-stat">
+                        <div class="training-stat-label">Current Fitness</div>
+                        <div class="training-stat-value">85 CTL</div>
+                    </div>
+                    <div class="training-stat">
+                        <div class="training-stat-label">Fatigue</div>
+                        <div class="training-stat-value">65 ATL</div>
+                    </div>
+                    <div class="training-stat">
+                        <div class="training-stat-label">Form</div>
+                        <div class="training-stat-value">+20 TSB</div>
+                    </div>
+                    <div class="training-stat">
+                        <div class="training-stat-label">Weekly Load</div>
+                        <div class="training-stat-value">450 TSS</div>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <canvas id="loadChart"></canvas>
+                </div>
+                
+                <div class="load-status load-status-optimal">
+                    <h4>Optimal Training Zone</h4>
+                    <p>Your current training load is well-balanced. You're making progress while managing fatigue effectively.</p>
+                </div>
+                
+                <div class="recommendations">
+                    <h3 class="sidebar-title">Recommended Actions</h3>
+                    <div class="recommendation">
+                        <h4>Easy Run</h4>
+                        <p>Schedule an easy recovery run tomorrow to maintain momentum while allowing recovery.</p>
+                    </div>
+                    <div class="recommendation">
+                        <h4>Interval Session</h4>
+                        <p>Your form indicates readiness for high-intensity work on Thursday.</p>
+                    </div>
+                    <div class="recommendation">
+                        <h4>Long Run</h4>
+                        <p>Plan for 16-18km on Sunday with final 5km at marathon pace.</p>
+                    </div>
+                </div>
+                
+                <button id="viewDetails" style="width: 100%; background-color: #fc5200; color: white; border: none; border-radius: 4px; padding: 10px 15px; font-weight: 600; font-size: 14px; cursor: pointer; margin-top: 20px;">View Detailed Analysis</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Detailed Analysis -->
+    <div id="detailsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Advanced Training Load Analysis</h2>
+                <span class="modal-close">&times;</span>
+            </div>
+            <div class="detailed-charts">
+                <div class="detailed-chart">
+                    <canvas id="fitnessChart"></canvas>
+                </div>
+                <div class="detailed-chart">
+                    <canvas id="loadDistributionChart"></canvas>
+                </div>
+                <div class="detailed-chart">
+                    <canvas id="rpeChart"></canvas>
+                </div>
+                <div class="detailed-chart">
+                    <canvas id="paceChart"></canvas>
+                </div>
+            </div>
+            <div class="detailed-insights">
+                <div class="insight-card">
+                    <h4>Training Status Analysis</h4>
+                    <p>Your current training load shows a 12% increase over the last 4 weeks, which is within the recommended progression range of 5-15%. Your chronic training load (CTL) has been steadily increasing, indicating improving fitness. Your body is handling the stress well as shown by your positive TSB (Training Stress Balance).</p>
+                </div>
+                <div class="insight-card">
+                    <h4>Performance Projection</h4>
+                    <p>Based on your training history and current fitness, we project you're on track for a 3:45 marathon finish time. Your VO2max is estimated at 52.8 ml/kg/min, which has improved 4.2% in the last 6 weeks.</p>
+                </div>
+                <div class="insight-card">
+                    <h4>Intensity Distribution</h4>
+                    <p>Your current Zone 1-2 training makes up 78% of your volume, with 15% in Zone 3, and 7% in Zones 4-5. To optimize marathon preparation, consider increasing Zone 2 slightly and incorporating more marathon-pace specific work (low Zone 3).</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Chart data for training load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Training Load Chart
+            const loadCtx = document.getElementById('loadChart').getContext('2d');
+            const loadChart = new Chart(loadCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [
+                        {
+                            label: 'Fitness (CTL)',
+                            data: [78, 79, 80, 82, 83, 84, 85],
+                            borderColor: '#4caf50',
+                            backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Fatigue (ATL)',
+                            data: [60, 68, 55, 70, 58, 62, 65],
+                            borderColor: '#f44336',
+                            backgroundColor: 'rgba(244, 67, 54, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Form (TSB)',
+                            data: [18, 11, 25, 12, 25, 22, 20],
+                            borderColor: '#2196f3',
+                            backgroundColor: 'rgba(33, 150, 243, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                boxWidth: 12,
+                                font: {
+                                    size: 10
+                                }
+                            }
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                drawBorder: false
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Modal functionality
+            const modal = document.getElementById('detailsModal');
+            const btn = document.getElementById('viewDetails');
+            const span = document.getElementsByClassName('modal-close')[0];
+
+            btn.onclick = function() {
+                modal.style.display = 'flex';
+                initDetailedCharts();
+            }
+
+            span.onclick = function() {
+                modal.style.display = 'none';
+            }
+
+            window.onclick = function(event) {
+                if (event.target == modal) {
+                    modal.style.display = 'none';
+                }
+            }
+            
+            // Initialize detailed charts when modal is opened
+            function initDetailedCharts() {
+                // Fitness History Chart
+                const fitnessCtx = document.getElementById('fitnessChart').getContext('2d');
+                const fitnessChart = new Chart(fitnessCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                        datasets: [
+                            {
+                                label: 'Fitness (CTL)',
+                                data: [45, 48, 52, 58, 65, 70, 75, 78, 80, 82, 84, 85],
+                                borderColor: '#4caf50',
+                                backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                                borderWidth: 2,
+                                fill: true,
+                                tension: 0.4
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Fitness Progression (12 Months)',
+                                font: {
+                                    size: 14
+                                }
+                            },
+                            legend: {
+                                position: 'bottom'
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: false,
+                                suggestedMin: 40,
+                                suggestedMax: 90
+                            }
+                        }
+                    }
+                });
+
+                // Load Distribution Chart
+                const distributionCtx = document.getElementById('loadDistributionChart').getContext('2d');
+                const loadDistributionChart = new Chart(distributionCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Zone 1 (Recovery)', 'Zone 2 (Endurance)', 'Zone 3 (Tempo)', 'Zone 4 (Threshold)', 'Zone 5 (VO2max)'],
+                        datasets: [{
+                            data: [23, 55, 15, 5, 2],
+                            backgroundColor: [
+                                '#8bc34a',
+                                '#4caf50',
+                                '#ffeb3b',
+                                '#ff9800',
+                                '#f44336'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Training Load Distribution by Zone',
+                                font: {
+                                    size: 14
+                                }
+                            },
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    boxWidth: 12,
+                                    font: {
+                                        size: 10
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+
+                // RPE Chart
+                const rpeCtx = document.getElementById('rpeChart').getContext('2d');
+                const rpeChart = new Chart(rpeCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                        datasets: [{
+                            label: 'Perceived Exertion (RPE)',
+                            data: [3, 7, 4, 8, 2, 6, 5],
+                            backgroundColor: 'rgba(33, 150, 243, 0.7)'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Weekly RPE (Rate of Perceived Exertion)',
+                                font: {
+                                    size: 14
+                                }
+                            },
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 10,
+                                ticks: {
+                                    stepSize: 1
+                                }
+                            }
+                        }
+                    }
+                });
+
+                // Pace Chart
+                const paceCtx = document.getElementById('paceChart').getContext('2d');
+                const paceChart = new Chart(paceCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                        datasets: [{
+                            label: 'Average Pace (min/km)',
+                            data: [5.45, 5.40, 5.35, 5.25, 5.20, 5.15, 5.10, 5.05, 5.00, 4.95, 4.90, 4.85],
+                            borderColor: '#ff9800',
+                            backgroundColor: 'rgba(255, 152, 0, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Pace Progression (12 Months)',
+                                font: {
+                                    size: 14
+                                }
+                            },
+                            legend: {
+                                position: 'bottom'
+                            }
+                        },
+                        scales: {
+                            y: {
+                                reverse: true,
+                                suggestedMin: 4.5,
+                                suggestedMax: 5.5
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Make feed post interactive
+            const postActions = document.querySelectorAll('.post-action');
+            postActions.forEach(action => {
+                action.addEventListener('click', function() {
+                    if (this.querySelector('i').classList.contains('fa-thumbs-up')) {
+                        this.querySelector('i').classList.toggle('fas');
+                        this.querySelector('i').classList.toggle('far');
+                        
+                        if (this.querySelector('i').classList.contains('fas')) {
+                            this.querySelector('i').style.color = '#fc5200';
+                            this.querySelector('span').style.color = '#fc5200';
+                        } else {
+                            this.querySelector('i').style.color = '#6d6d78';
+                            this.querySelector('span').style.color = '#6d6d78';
+                        }
+                    }
+                });
+            });
+
+            // Initialize training load analysis interactivity
+            const recommendations = document.querySelectorAll('.recommendation');
+            recommendations.forEach(rec => {
+                rec.addEventListener('mouseenter', function() {
+                    this.style.backgroundColor = '#f9f9fb';
+                    this.style.cursor = 'pointer';
+                });
+                rec.addEventListener('mouseleave', function() {
+                    this.style.backgroundColor = 'transparent';
+                });
+                rec.addEventListener('click', function() {
+                    alert('Feature coming soon: Add this workout to your calendar');
+                });
+            });
+        });
+    </script>
+</body>
+</html>
